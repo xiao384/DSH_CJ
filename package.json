@@ -1,0 +1,30 @@
+{
+  "name": "dsh-qq-browser-bridge",
+  "version": "0.1.0",
+  "description": "DSH (DeepSeek Harness) plugin/bridge: QQ NT (OneBot v11 / SnowLuma) <-> DeepSeek agent, with browser automation (view pages, watch videos, play web games) via Playwright + browser-use.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "tsx src/cli.ts bridge",
+    "mcp": "tsx src/cli.ts mcp",
+    "dev": "tsx watch src/cli.ts bridge",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.json",
+    "install-browser": "playwright install chromium"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "dotenv": "^16.4.5",
+    "playwright": "^1.47.0",
+    "ws": "^8.18.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/ws": "^8.5.10",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.4"
+  }
+}
