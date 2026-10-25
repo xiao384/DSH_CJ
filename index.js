@@ -1,5 +1,5 @@
 /**
- * DSH in-process plugin: real browser tools for the DeepSeek agent.
+ * DSH in-process plugin: real browser + server-control tools for the DeepSeek agent.
  *
  * Ported from xiao384/DSH_CJ (plugin/src/index.ts) and adapted to the DSH
  * 0.2.1 tool contract:
@@ -11,6 +11,7 @@
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import { BrowserController } from './lib/browser.js'
 import { browserTools } from './lib/tools.js'
+import { systemTools, serverControlEnabled } from './lib/system.js'
 
 export const name = 'dsh-qq-browser-bridge'
 // Only depend on the tool registry. Everything else (attachments) is optional
@@ -38,7 +39,7 @@ export function apply(ctx) {
     void controller.close()
   })
 
-  for (const tool of browserTools) {
+  for (const tool of [...browserTools, ...systemTools]) {
     const imageTool = tool.image === true
     ctx.tools.register(
       defineTool({
@@ -94,5 +95,14 @@ export function apply(ctx) {
     )
   }
 
-  console.log(`[dsh-browser-tools] registered ${browserTools.length} browser tools`)
+  if (serverControlEnabled) {
+    console.warn(
+      '[dsh-browser-tools] ⚠️ SERVER CONTROL ENABLED: server_exec / file tools grant shell & file ' +
+        'access to whoever can prompt the agent. Restrict the QQ bridge to the owner / a trusted ' +
+        'whitelist, or set SERVER_CONTROL_ENABLED=0 to disable.',
+    )
+  }
+  console.log(
+    `[dsh-browser-tools] registered ${browserTools.length} browser tools + ${systemTools.length} server-control tools`,
+  )
 }

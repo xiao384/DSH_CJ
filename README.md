@@ -37,3 +37,23 @@ dsh plugin --profile desktop add file:C:/DshBridge/dsh-browser-tools
 `browser_type` · `browser_key` · `browser_scroll` · `browser_mouse` · `browser_video` · `browser_eval`
 
 （原仓库的 `browser_task` 自主要目标规划依赖外部 LLM thinker，未移植。）
+
+## 服务器控制（通过 QQ 控制本机）
+
+qq-bridge 默认是「聊天权限」会话，不会给 agent 本地终端/文件工具。本插件额外注入一组**服务器控制工具**，让经 QQ 进来的会话也能直接控制运行 DSH 的机器：
+
+| 工具 | 说明 |
+|---|---|
+| `server_exec` | 在 DSH 所在主机执行 shell 命令，返回 stdout/stderr/退出码（看状态、查日志、起停服务、装包等） |
+| `server_file_read` | 读主机文本文件（上限 200KB） |
+| `server_file_write` | 写/覆盖主机文件（自动建目录） |
+| `server_file_list` | 列目录 |
+| `server_pwd` | 当前工作目录 |
+
+这些工具以自定义名字注册，不会被 qq-bridge 的本地工具守卫（`qq-tool-restrict`）隐藏，因此在 chat-only 会话里也可用。
+
+**安全（务必读）**：这等于把主机的终端/文件权限交给了能跟 agent 对话的人。请务必：
+
+- 把 QQ 桥接限制在 **owner 私聊**或**可信白名单群**；
+- 不要对公群开放；
+- 不需要时设 `SERVER_CONTROL_ENABLED=0` 关闭整组工具（每条命令会在 DSH 控制台以 `[dsh-browser-tools] server_exec: ...` 记录，便于审计）。
