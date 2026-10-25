@@ -72,7 +72,12 @@ export class OneBotClient extends EventEmitter {
       });
       ws.on('error', (err) => {
         console.error('[onebot] connection error:', err.message);
-        if (this.echoCounter === 1) reject(err);
+        // Don't reject on first failure: keep retrying in background so the
+        // bridge survives OneBot being offline at startup.
+        if (this.echoCounter === 1) {
+          resolve();
+          return;
+        }
         this.scheduleReconnect();
       });
       ws.on('close', () => this.scheduleReconnect());

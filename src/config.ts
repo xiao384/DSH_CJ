@@ -20,7 +20,7 @@ export type BridgeMode = 'dsh' | 'deepseek';
 export type GroupTrigger = 'mention' | 'prefix' | 'always';
 
 export const config = {
-  bridgeMode: (str('BRIDGE_MODE', 'deepseek') as BridgeMode),
+  bridgeMode: (str('BRIDGE_MODE', 'dsh') as BridgeMode),
 
   onebot: {
     url: str('ONEBOT_URL', 'ws://127.0.0.1:3001'),
