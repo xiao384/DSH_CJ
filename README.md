@@ -164,14 +164,14 @@ scripts/test-mcp.mjs   MCP 冒烟测试
 
 ## 作为 DSH 进程内插件安装（最新版 DSH）
 
-除了“独立桥接进程”，本仓库还带了一份**真正的 DSH Cordis 插件**（`plugin/` 目录），
+除了“独立桥接进程”，本仓库根目录本身就是一个 **DSH Cordis bundle**（入口 `src/plugin/index.ts`），
 直接装进 DSH 后，DS agent 就获得浏览器能力（看网页/视频/游戏），符合“发给 DSH 即用”的形态。
 
 插件做两件事：
 1. **注册浏览器工具**（核心）：用 `defineTool` + `ctx.tools.register` 把 11 个浏览器工具挂进 DSH，
    agent 在任意会话里都能调用——这正是比 qq-bridge（只读网页）强的地方。
 2. **可选桥接 QQ**（默认关闭）：把 OneBot/SnowLuma 的消息灌进 DSH 会话并回传回复。需先把
-   `plugin/src/sessionBridge.ts` 里的三处 `[DSH-ADJUST]` 对齐你的 DSH 版本，再设 `DSH_INPROC_BRIDGE=1`。
+   `src/plugin/sessionBridge.ts` 里的三处 `[DSH-ADJUST]` 对齐你的 DSH 版本，再设 `DSH_INPROC_BRIDGE=1`。
 
 ### 安装（二选一）
 
@@ -183,17 +183,17 @@ dsh --profile <你的profile名> --dump-config   # 确认插件层位置正确
 ```
 
 **B. 本地 scratch 开发（绝对路径挂载）**
-编辑 `plugin/cordis.patch.yml`，把 `name` 改成入口 `.ts` 的**绝对路径**，然后：
+编辑根目录 `cordis.patch.yml`，把 `name` 改成入口 `.ts` 的**绝对路径**，然后：
 ```bash
-pnpm dsh web --patch ./plugin/cordis.patch.yml
+pnpm dsh web --patch ./cordis.patch.yml
 ```
 
 ### 验证
 装好后，在 DSH 里直接对 agent 说“打开 bilibili 看热门视频”或“去 4399 玩贪吃蛇”，
 agent 会调用 `browser_navigate` / `browser_screenshot` / `browser_key` 等工具。
 
-> 插件依赖 `@deepseek-ai/dsh-tools`、`@deepseek-ai/cordis`（由 DSH 运行时提供），
-> 因此 `plugin/` 不参与本仓库根目录的 `tsc` 类型检查；它应在 DSH 的 profile 环境内构建/加载。
+> 插件依赖 `@deepseek-ai/dsh-tools`、`@deepseek-ai/cordis`（由 DSH 运行时提供，已在 `package.json` 的 `peerDependencies` 声明），
+> 因此 `src/plugin/` 不参与本仓库根目录的 `tsc` 类型检查；它应在 DSH 的 profile 环境内构建/加载。
 
 > 若你更偏好 MCP 形态，`src/browser/mcpServer.ts`（即 `npm run mcp`）仍是标准 MCP 服务器，
 > 可在 DSH 的 MCP 配置里用启动命令挂载，效果等价。

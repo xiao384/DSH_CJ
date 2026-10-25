@@ -1,0 +1,13 @@
+# DSH bundle patch for this plugin (repo root is the package).
+#
+# For local scratch development, point `name` at the ABSOLUTE path of the entry
+# .ts file, e.g.:
+#   insert:
+#     - id: dsh-qq-browser-bridge
+#       name: /abs/path/to/DSH_CJ/src/plugin/index.ts
+#
+# When installed as a bundle via `dsh plugin --profile <name> add <repo>`,
+# DSH reads this patch from the package root and registers the plugin.
+insert:
+  - id: dsh-qq-browser-bridge
+    name: ./src/plugin/index.ts

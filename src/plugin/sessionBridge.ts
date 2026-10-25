@@ -1,7 +1,7 @@
-import type { OneBotClient, OBMessageEvent } from '../../onebot/client.js';
-import { config } from '../../config.js';
-import { chatKey, type ChatRef } from '../../types.js';
-import { shouldRespond, replyToSegments, resolveIncomingImage } from '../../bridge/renderer.js';
+import type { OneBotClient, OBMessageEvent } from '../onebot/client.js';
+import { config } from '../config.js';
+import { chatKey, type ChatRef } from '../types.js';
+import { shouldRespond, replyToSegments, resolveIncomingImage } from '../bridge/renderer.js';
 
 /**
  * Bridges QQ (OneBot) messages into DSH sessions and sends the agent reply back

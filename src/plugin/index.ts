@@ -1,8 +1,8 @@
 import { defineTool } from '@deepseek-ai/dsh-tools';
-import { BrowserController } from '../../browser/controller.js';
-import { browserTools } from '../../browser/tools.js';
-import { config } from '../../config.js';
-import { OneBotClient } from '../../onebot/client.js';
+import { BrowserController } from '../browser/controller.js';
+import { browserTools } from '../browser/tools.js';
+import { config } from '../config.js';
+import { OneBotClient } from '../onebot/client.js';
 import { toDshParameters, renderOutput, type ToolReturn } from './dshToolShim.js';
 import { runSessionBridge } from './sessionBridge.js';
 
@@ -23,8 +23,17 @@ export function apply(ctx: any): void {
         name: t.def.name,
         description: t.def.description,
         parameters: toDshParameters(t.def.parameters),
+        // The tool's execute() returns an object {text, imageBase64, mime},
+        // so the output schema must describe that object (not a bare string).
         output: {
-          schema: { type: 'string' },
+          schema: {
+            type: 'object',
+            properties: {
+              text: { type: 'string' },
+              imageBase64: { type: 'string' },
+              mime: { type: 'string' },
+            },
+          },
           render: (_args: unknown, value: ToolReturn) => renderOutput(value),
         },
         async execute(args: Record<string, unknown>): Promise<ToolReturn> {

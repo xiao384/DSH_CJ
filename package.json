@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "description": "DSH (DeepSeek Harness) plugin/bridge: QQ NT (OneBot v11 / SnowLuma) <-> DeepSeek agent, with browser automation (view pages, watch videos, play web games) via Playwright + browser-use.",
   "type": "module",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
   "engines": {
     "node": ">=18"
   },
@@ -20,6 +25,10 @@
     "playwright": "^1.47.0",
     "ws": "^8.18.0",
     "zod": "^3.23.8"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*",
+    "@deepseek-ai/dsh-tools": "*"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
