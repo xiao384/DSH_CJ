@@ -38,6 +38,11 @@ dsh plugin --profile desktop add file:C:/DshBridge/dsh-browser-tools
 
 （原仓库的 `browser_task` 自主要目标规划依赖外部 LLM thinker，未移植。）
 
+### 看视频 / 听音乐（AI 真正感知媒体）
+- **看视频**：`browser_video` 现在会**截图当前播放帧**作为图片返回（不只是状态文字）。视觉模型由此真正「看到」画面；反复调用即可跟看视频进度。打开 bilibili/YouTube 后多次调 `browser_video` 即可。
+- **听音乐**：`server_audio_capture` 把主机音频输出录成 WAV（AI「听」的原始数据），可选经 `AUDIO_ASR_CMD`（如 `whisper %FILE%`）转写成文字。Windows 需在 `AUDIO_DEVICE` 设一个已启用的环回设备（如「Stereo Mix (Realtek)」或虚拟声卡）；Linux 用 pulse。需本机装 `ffmpeg`。
+- 想让**人**直接听到：把浏览器设为有头模式（`BROWSER_HEADLESS=false`），在服务器屏幕上播放、声音从音箱出来，AI 仍用上面的帧截图 / 录音来「看 / 听」。
+
 ## 服务器控制（通过 QQ 控制本机）
 
 qq-bridge 默认是「聊天权限」会话，不会给 agent 本地终端/文件工具。本插件额外注入一组**服务器控制工具**，让经 QQ 进来的会话也能直接控制运行 DSH 的机器：
@@ -48,6 +53,7 @@ qq-bridge 默认是「聊天权限」会话，不会给 agent 本地终端/文�
 | `server_terminal` | **持久终端会话**：保留 cwd/环境变量/ shell 状态，多次调用间连续（像真终端）；默认 powershell（Win）/ bash（Linux），可 `shell:"cmd"` |
 | `server_process_list` | 列出主机进程（Windows `tasklist` / Linux `ps`） |
 | `server_process_kill` | 按 PID 结束进程（Windows `taskkill /F` / Linux `kill -9`） |
+| `server_audio_capture` | 录制主机音频输出 N 秒存为 WAV（AI「听」的原始数据）；设 `AUDIO_ASR_CMD` 可顺带转写。受终端白名单限制 |
 | `server_file_read` | 读主机文本文件（上限 200KB） |
 | `server_file_write` | 写/覆盖主机文件（自动建目录） |
 | `server_file_list` | 列目录 |
@@ -70,5 +76,5 @@ qq-bridge 默认是「聊天权限」会话，不会给 agent 本地终端/文�
   - 环境变量：`SERVER_TERMINAL_ALLOWLIST="12345 group:67890"`（逗号/空格分隔）
   - 插件根目录放 `whitelist.json`：`{ "allow": ["12345", "group:67890"] }`
 - **白名单为空时该闸门不生效**（仅受 `SERVER_CONTROL_ENABLED` 约束），且首次调用会在 DSH 控制台打印 `terminal caller id = <id>`，照着把 id 填进白名单即可。
-- 白名单非空后，只有列表内的调用者能执行 `server_exec` / `server_terminal` / `server_process_kill`；其余人会得到拒绝对话。
+- 白名单非空后，只有列表内的调用者能执行 `server_exec` / `server_terminal` / `server_process_kill` / `server_audio_capture`；其余人会得到拒绝对话。
 - 文件读/列（`server_file_read` / `server_file_list` / `server_process_list`）不在白名单限制内，仍只受全局 `SERVER_CONTROL_ENABLED` 约束。
