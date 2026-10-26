@@ -60,3 +60,15 @@ qq-bridge 默认是「聊天权限」会话，不会给 agent 本地终端/文�
 - 把 QQ 桥接限制在 **owner 私聊**或**可信白名单群**；
 - 不要对公群开放；
 - 不需要时设 `SERVER_CONTROL_ENABLED=0` 关闭整组工具（每条命令会在 DSH 控制台以 `[dsh-browser-tools] server_exec: ...` 记录，便于审计）。
+
+### 终端白名单（按调用者限制）
+
+默认所有能进会话的人都能让 AI 调终端，**不安全**。可以再叠一层**按调用者身份的白名单**，只放行指定的人：
+
+- 身份来自 DSH 执行上下文的 `exec.agent.session`（不是 agent 自报的参数，**无法伪造**）。私聊会话的 id 通常是你的 QQ 号；群会话的 key 形如 `group:<群号>`。
+- 配置方式二选一：
+  - 环境变量：`SERVER_TERMINAL_ALLOWLIST="12345 group:67890"`（逗号/空格分隔）
+  - 插件根目录放 `whitelist.json`：`{ "allow": ["12345", "group:67890"] }`
+- **白名单为空时该闸门不生效**（仅受 `SERVER_CONTROL_ENABLED` 约束），且首次调用会在 DSH 控制台打印 `terminal caller id = <id>`，照着把 id 填进白名单即可。
+- 白名单非空后，只有列表内的调用者能执行 `server_exec` / `server_terminal` / `server_process_kill`；其余人会得到拒绝对话。
+- 文件读/列（`server_file_read` / `server_file_list` / `server_process_list`）不在白名单限制内，仍只受全局 `SERVER_CONTROL_ENABLED` 约束。

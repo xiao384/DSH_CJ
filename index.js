@@ -67,8 +67,8 @@ export function apply(ctx) {
               schema: { type: 'string' },
               render: (_args, value) => [{ type: 'text', text: value }],
             },
-        async execute(args) {
-          const result = await tool.run(args ?? {}, { controller })
+        async execute(args, exec) {
+          const result = await tool.run(args ?? {}, { controller, exec })
           if (!imageTool) return result?.text ?? ''
           if (!result?.image) return { text: result?.text ?? '(no output)' }
           const attachments = ctx.get('attachments')
