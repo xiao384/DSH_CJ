@@ -55,11 +55,17 @@ export function apply(ctx) {
                 properties: {
                   text: { type: 'string', required: true },
                   image: IMAGE_SCHEMA,
+                  images: { type: 'array', items: IMAGE_SCHEMA },
                 },
               },
               render: (_args, value) => {
                 const blocks = [{ type: 'text', text: value.text }]
-                if (value.image) blocks.push({ type: 'image', attachment: value.image })
+                const imgs = value.images?.length
+                  ? value.images
+                  : value.image
+                    ? [value.image]
+                    : []
+                for (const im of imgs) blocks.push({ type: 'image', attachment: im })
                 return blocks
               },
             }
@@ -70,27 +76,35 @@ export function apply(ctx) {
         async execute(args, exec) {
           const result = await tool.run(args ?? {}, { controller, exec })
           if (!imageTool) return result?.text ?? ''
-          if (!result?.image) return { text: result?.text ?? '(no output)' }
+          const rawImages = result?.images?.length
+            ? result.images
+            : result?.image
+              ? [{ data: result.image, mime: result.mime }]
+              : []
+          if (!rawImages.length) return { text: result?.text ?? '(no output)' }
           const attachments = ctx.get('attachments')
           if (!attachments?.saveImage) {
-            return { text: `${result.text ?? 'Screenshot'}\n(screenshot not attached: no attachment service is mounted)` }
+            return {
+              text: `${result.text ?? 'media'}\n(${rawImages.length} image(s) not attached: no attachment service is mounted)`,
+            }
           }
-          const ref = await attachments.saveImage({
-            data: result.image,
-            mediaType: result.mime ?? 'image/png',
-            name: 'browser-screenshot.png',
-          })
-          return {
-            text: result.text ?? 'Screenshot',
-            image: {
+          const saved = []
+          for (const im of rawImages) {
+            const ref = await attachments.saveImage({
+              data: im.data,
+              mediaType: im.mime ?? 'image/png',
+              name: im.name ?? 'frame.png',
+            })
+            saved.push({
               attachmentId: ref.attachmentId,
               mediaType: ref.mediaType,
               bytes: ref.bytes,
               width: ref.width,
               height: ref.height,
               ...(ref.name === undefined ? {} : { name: ref.name }),
-            },
+            })
           }
+          return { text: result.text ?? '', images: saved }
         },
       }),
     )
