@@ -44,7 +44,7 @@ qq-bridge 默认是「聊天权限」会话，不会给 agent 本地终端/文�
 
 | 工具 | 说明 |
 |---|---|
-| `server_exec` | 在 DSH 所在主机执行 shell 命令，返回 stdout/stderr/退出码（看状态、查日志、起停服务、装包等） |
+| `server_exec` | 在 DSH 所在主机执行命令，返回 stdout/stderr/退出码；可指定 shell：`powershell`（Windows 默认）/ `cmd` / `bash` / `sh`（看状态、查日志、起停服务、装包等） |
 | `server_file_read` | 读主机文本文件（上限 200KB） |
 | `server_file_write` | 写/覆盖主机文件（自动建目录） |
 | `server_file_list` | 列目录 |
