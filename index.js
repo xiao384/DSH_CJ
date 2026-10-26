@@ -11,7 +11,7 @@
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import { BrowserController } from './lib/browser.js'
 import { browserTools } from './lib/tools.js'
-import { systemTools, serverControlEnabled } from './lib/system.js'
+import { systemTools, serverControlEnabled, disposeTerminal } from './lib/system.js'
 
 export const name = 'dsh-qq-browser-bridge'
 // Only depend on the tool registry. Everything else (attachments) is optional
@@ -37,6 +37,7 @@ export function apply(ctx) {
 
   ctx.effect(() => () => {
     void controller.close()
+    disposeTerminal()
   })
 
   for (const tool of [...browserTools, ...systemTools]) {

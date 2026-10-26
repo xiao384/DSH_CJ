@@ -45,6 +45,9 @@ qq-bridge 默认是「聊天权限」会话，不会给 agent 本地终端/文�
 | 工具 | 说明 |
 |---|---|
 | `server_exec` | 在 DSH 所在主机执行命令，返回 stdout/stderr/退出码；可指定 shell：`powershell`（Windows 默认）/ `cmd` / `bash` / `sh`（看状态、查日志、起停服务、装包等） |
+| `server_terminal` | **持久终端会话**：保留 cwd/环境变量/ shell 状态，多次调用间连续（像真终端）；默认 powershell（Win）/ bash（Linux），可 `shell:"cmd"` |
+| `server_process_list` | 列出主机进程（Windows `tasklist` / Linux `ps`） |
+| `server_process_kill` | 按 PID 结束进程（Windows `taskkill /F` / Linux `kill -9`） |
 | `server_file_read` | 读主机文本文件（上限 200KB） |
 | `server_file_write` | 写/覆盖主机文件（自动建目录） |
 | `server_file_list` | 列目录 |
