@@ -55,7 +55,8 @@ qq-bridge 默认是「聊天权限」会话，不会给 agent 本地终端/文�
 | `server_process_kill` | 按 PID 结束进程（Windows `taskkill /F` / Linux `kill -9`） |
 | `server_audio_capture` | 录制主机音频输出 N 秒存为 WAV（AI「听」的原始数据）；设 `AUDIO_ASR_CMD` 可顺带转写。受终端白名单限制 |
 | `server_download` | 从互联网下载文件/URL 到主机（curl / Invoke-WebRequest）。受终端白名单限制 |
-| `server_open` | 用主机默认程序打开文件/URL（让人直接看/听）。受终端白名单限制 |
+| `server_open` | 用主机默认程序打开文件/URL（让人直接看/听），Windows 下返回新进程 PID。受终端白名单限制 |
+| `server_screenshot` | 截取**主机桌面/指定窗口**（ffmpeg gdigrab/x11grab），让 AI 直接「看到」桌面软件——用于可视化软件测试/QA。受终端白名单限制 |
 | `server_file_read` | 读主机文本文件（上限 200KB） |
 | `server_file_write` | 写/覆盖主机文件（自动建目录） |
 | `server_file_list` | 列目录 |
@@ -78,5 +79,5 @@ qq-bridge 默认是「聊天权限」会话，不会给 agent 本地终端/文�
   - 环境变量：`SERVER_TERMINAL_ALLOWLIST="12345 group:67890"`（逗号/空格分隔）
   - 插件根目录放 `whitelist.json`：`{ "allow": ["12345", "group:67890"] }`
 - **白名单为空时该闸门不生效**（仅受 `SERVER_CONTROL_ENABLED` 约束），且首次调用会在 DSH 控制台打印 `terminal caller id = <id>`，照着把 id 填进白名单即可。
-- 白名单非空后，只有列表内的调用者能执行 `server_exec` / `server_terminal` / `server_process_kill` / `server_audio_capture` / `server_download` / `server_open`；其余人会得到拒绝对话。
+- 白名单非空后，只有列表内的调用者能执行 `server_exec` / `server_terminal` / `server_process_kill` / `server_audio_capture` / `server_download` / `server_open` / `server_screenshot`；其余人会得到拒绝对话。
 - 文件读/列（`server_file_read` / `server_file_list` / `server_process_list`）不在白名单限制内，仍只受全局 `SERVER_CONTROL_ENABLED` 约束。
