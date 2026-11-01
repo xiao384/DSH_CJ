@@ -43,6 +43,17 @@ dsh plugin --profile desktop add file:C:/DshBridge/dsh-browser-tools
 - **听音乐**：`server_audio_capture` 把主机音频输出录成 WAV（AI「听」的原始数据），可选经 `AUDIO_ASR_CMD`（如 `whisper %FILE%`）转写成文字。Windows 需在 `AUDIO_DEVICE` 设一个已启用的环回设备（如「Stereo Mix (Realtek)」或虚拟声卡）；Linux 用 pulse。需本机装 `ffmpeg`。
 - 想让**人**直接听到：把浏览器设为有头模式（`BROWSER_HEADLESS=false`），在服务器屏幕上播放、声音从音箱出来，AI 仍用上面的帧截图 / 录音来「看 / 听」。
 
+### 玩网页游戏（AI 操作浏览器）
+浏览器工具本身就是一套完整的「眼睛 + 手」，`browser_key` 还支持**按住/松开**按键，足够驱动大多数网页游戏：
+
+1. `browser_navigate({url:"http://47.76.80.118/"})` 打开游戏页；
+2. `browser_screenshot()` 让 AI 看一眼当前画面（canvas 游戏别用 `browser_observe`，文字/无障碍树对 canvas 无效，截图才有效）；
+3. `browser_click({selector:"canvas"})` 或点坐标 `browser_click({selector:"640,400"})` 给游戏焦点；
+4. 移动/操作：`browser_key({key:"ArrowRight", action:"down"})` 按住方向，`browser_key({key:"ArrowRight", action:"up"})` 松开；`browser_key({key:"Space"})` 普通点击/跳跃；`browser_mouse({action:"down", x, y})` 做拖拽/点击；
+5. 循环：截图 → 看 → 按键 → 截图，AI 自己形成「观察-决策-操作」闭环。
+
+提示：把 `BROWSER_HEADLESS` 设为 `false`，人也能在服务器屏幕上一起看 AI 玩。
+
 ## 服务器控制（通过 QQ 控制本机）
 
 qq-bridge 默认是「聊天权限」会话，不会给 agent 本地终端/文件工具。本插件额外注入一组**服务器控制工具**，让经 QQ 进来的会话也能直接控制运行 DSH 的机器：
