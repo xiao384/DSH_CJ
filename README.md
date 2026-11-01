@@ -85,10 +85,11 @@ qq-bridge 默认是「聊天权限」会话，不会给 agent 本地终端/文�
 
 默认所有能进会话的人都能让 AI 调终端，**不安全**。可以再叠一层**按调用者身份的白名单**，只放行指定的人：
 
-- 身份来自 DSH 执行上下文的 `exec.agent.session`（不是 agent 自报的参数，**无法伪造**）。私聊会话的 id 通常是你的 QQ 号；群会话的 key 形如 `group:<群号>`。
+- 身份来自 DSH 执行上下文的 `exec.agent.session`（不是 agent 自报的参数，**无法伪造**）。代码 `resolveCallerId` 依次取 `session.id` → `session.key` → … → `user.id` → `caller.id`，**`session.id` 不一定是 QQ 号**，不同 DSH/桥接版本填充方式不同。
+- ⚠️ 不要靠猜「QQ 号」来配：白名单为空时首次终端调用会在 DSH 控制台打印 `terminal caller id = <真实id>`，**直接照抄这个打印值**填进白名单（数字、`group:xxx` 或其它形式都以控制台为准）。
 - 配置方式二选一：
-  - 环境变量：`SERVER_TERMINAL_ALLOWLIST="12345 group:67890"`（逗号/空格分隔）
-  - 插件根目录放 `whitelist.json`：`{ "allow": ["12345", "group:67890"] }`
-- **白名单为空时该闸门不生效**（仅受 `SERVER_CONTROL_ENABLED` 约束），且首次调用会在 DSH 控制台打印 `terminal caller id = <id>`，照着把 id 填进白名单即可。
+  - 环境变量：`SERVER_TERMINAL_ALLOWLIST="<真实id1> <真实id2>"`（逗号/空格分隔）
+  - 插件根目录放 `whitelist.json`：`{ "allow": ["<真实id1>", "group:67890"] }`
+- **白名单为空时该闸门不生效**（仅受 `SERVER_CONTROL_ENABLED` 约束），首次调用也会在控制台打印 caller id 方便你配置。
 - 白名单非空后，只有列表内的调用者能执行 `server_exec` / `server_terminal` / `server_process_kill` / `server_audio_capture` / `server_download` / `server_open` / `server_screenshot`；其余人会得到拒绝对话。
 - 文件读/列（`server_file_read` / `server_file_list` / `server_process_list`）不在白名单限制内，仍只受全局 `SERVER_CONTROL_ENABLED` 约束。
