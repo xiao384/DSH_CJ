@@ -34,7 +34,7 @@ dsh plugin --profile desktop add file:C:/DshBridge/dsh-browser-tools
 ## 工具
 
 `browser_navigate` · `browser_observe` · `browser_screenshot` · `browser_click` ·
-`browser_type` · `browser_key` · `browser_scroll` · `browser_mouse` · `browser_video` · `browser_eval`
+`browser_type` · `browser_key` · `browser_scroll` · `browser_mouse` · `browser_drag` · `browser_video` · `browser_eval`
 
 （原仓库的 `browser_task` 自主要目标规划依赖外部 LLM thinker，未移植。）
 
@@ -49,7 +49,7 @@ dsh plugin --profile desktop add file:C:/DshBridge/dsh-browser-tools
 1. `browser_navigate({url:"http://47.76.80.118/"})` 打开游戏页；
 2. `browser_screenshot()` 让 AI 看一眼当前画面（canvas 游戏别用 `browser_observe`，文字/无障碍树对 canvas 无效，截图才有效）；
 3. `browser_click({selector:"canvas"})` 或点坐标 `browser_click({selector:"640,400"})` 给游戏焦点；
-4. 移动/操作：`browser_key({key:"ArrowRight", action:"down"})` 按住方向，`browser_key({key:"ArrowRight", action:"up"})` 松开；`browser_key({key:"Space"})` 普通点击/跳跃；`browser_mouse({action:"down", x, y})` 做拖拽/点击；
+4. 移动/操作：`browser_key({key:"ArrowRight", action:"down"})` 按住方向，`browser_key({key:"ArrowRight", action:"up"})` 松开；`browser_key({key:"Space"})` 普通点击/跳跃；`browser_mouse({action:"down", x, y})` 做点按；拖拽类游戏（弹弓/转向/画线）用 `browser_drag({fromX,fromY,toX,toY,steps})` 一次完成「按住→平滑拖动→松开」。
 5. 循环：截图 → 看 → 按键 → 截图，AI 自己形成「观察-决策-操作」闭环。
 
 提示：把 `BROWSER_HEADLESS` 设为 `false`，人也能在服务器屏幕上一起看 AI 玩。
