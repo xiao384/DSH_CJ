@@ -1,6 +1,6 @@
 {
   "name": "dsh-qq-browser-bridge",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "DSH in-process plugin: gives the DeepSeek agent a real browser (Playwright): open pages, read them, screenshot, click/type/key/scroll, inspect video and web-game state.",
   "type": "module",
   "main": "./index.js",

@@ -34,7 +34,7 @@ dsh plugin --profile desktop add file:C:/DshBridge/dsh-browser-tools
 ## 工具
 
 `browser_navigate` · `browser_observe` · `browser_screenshot` · `browser_click` ·
-`browser_type` · `browser_key` · `browser_scroll` · `browser_mouse` · `browser_drag` · `browser_macro` · `browser_video` · `browser_eval`
+`browser_type` · `browser_key` · `browser_scroll` · `browser_mouse` · `browser_drag` · `browser_macro` · `browser_frame` · `browser_video` · `browser_eval`
 
 （原仓库的 `browser_task` 自主要目标规划依赖外部 LLM thinker，未移植。）
 
@@ -67,6 +67,40 @@ dsh plugin --profile desktop add file:C:/DshBridge/dsh-browser-tools
 可用动作：`navigate URL` · `click 640,400` / `click #btn` · `dblclick` · `rclick`（右键）· `move x,y` · `down` / `up`（按住/松开，可带 button）· `drag x1,y1,x2,y2 [steps]` · `key <键名> [down|up] [次数]`（支持 `Control+C` 等组合键）· `type 文本` · `scroll dx,dy` · `wait 毫秒` · `screenshot`（抓帧）· `observe` · `eval <js>`。
 
 参数：`finalScreenshot`（默认 `true`，结束自动补截图）、`stopOnError`（默认 `false`，遇错继续）、`stepDelay`（每步后额外等待毫秒）。返回**逐步日志** + **多张图片**（过程帧 + 最终帧）。安全上限：最多 50 步、单步 `wait` ≤ 10 秒、总等待 ≤ 60 秒。
+
+宏里还有两个专门给云端 IDE 用的动作：`cmd <命令>`（输入并回车）和 `frame <序号> <动作> [参数]`（进 iframe 操作），见下一节。
+
+### 看全网页 / 操作云端 IDE 网页终端（如 ModelScope `/code/workspace`）
+这类页面（VSCode Web、JupyterLab、ModelScope 代码工作区）有两个坑，之前会导致 AI 说「看不到网页全部」「终端点不到、命令输不进去」：
+
+| 症状 | 原因 | 现在怎么解 |
+|---|---|---|
+| 只能看到一屏 | 截图默认只截 **1280×800 视口**；`browser_observe` 正文默认截断 1500 字符 | `browser_screenshot({fullPage:true})` 截整页；`browser_observe({limit:10000, maxElements:100})` 读更多文本；也可用 `selector` 只截某个元素 |
+| 终端点不到 / 输入无效 | 终端是 **xterm.js `<canvas>`**，没有可 `fill()` 的 input，且常**嵌在 iframe** 里；`browser_click`/`browser_eval` 只作用于主 frame | 用 `browser_frame` 进 iframe；或先用**视口坐标**点击终端，再 `browser_type` 省略 `target` 打到当前焦点 |
+
+**标准流程**（先登录后打开工作区）：
+
+1. `browser_navigate({url:"https://www.modelscope.cn/code/workspace"})`，必要时 `browser_macro` 里 `wait 3000` 等加载。
+2. `browser_observe({limit:10000})` —— 输出末尾有 **FRAMES** 列表，找出终端所在的 iframe 序号（如 `[1]`），也可以 `browser_frame({action:"list"})`。
+3. **聚焦终端**（二选一）：
+   - `browser_frame({frame:"1", action:"focus", target:"textarea.xterm-helper-textarea"})`（xterm 的隐藏输入框）；
+   - 或 `browser_click({target:"600,500"})` 直接点终端区域的视口坐标。
+4. **输入命令并回车**：
+   - `browser_type({text:"ls -la", pressEnter:true})`（**不要传 target**，`delay:30` 对 canvas 终端更稳）；
+   - 或 `browser_frame({frame:"1", action:"type", text:"ls -la", pressEnter:true})`。
+5. **读终端输出**：`browser_frame({frame:"1", action:"text"})` 会同时尝试 `.xterm-rows` / `.xterm-accessibility-tree` / `window.term.buffer`；也可用 `browser_frame({frame:"1", action:"screenshot"})` 看 iframe 画面。
+6. 一次跑完（推荐，少往返）：
+   ```
+   navigate https://www.modelscope.cn/code/workspace
+   wait 3000
+   frame 1 focus textarea.xterm-helper-textarea
+   cmd ls -la
+   wait 1500
+   frame 1 text
+   screenshot
+   ```
+
+补充：`browser_frame` 还支持 `action:"click"`（CSS 或 `"x,y"`）、`"key"`、`"eval"`（在该 frame 内跑 JS）、`"scroll"`（滚 iframe 内部）；`browser_screenshot({fullPage:true})` 只滚主文档，iframe 内部要滚用 `browser_frame({action:"scroll"})`。
 
 ### 看视频 / 听音乐（AI 真正感知媒体）
 - **看视频**：`browser_video` 会**截图当前播放帧**作为图片返回（不只是状态文字）。可一次抓多帧连续跟看：传 `frames`（如 4）和 `interval`（毫秒，如 1500），一次调用抓 N 张帧拼成一组图。视觉模型由此真正「看到」画面。打开 bilibili/YouTube 后调 `browser_video({frames:4, interval:1500})` 即可。
