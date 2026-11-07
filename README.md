@@ -34,9 +34,39 @@ dsh plugin --profile desktop add file:C:/DshBridge/dsh-browser-tools
 ## 工具
 
 `browser_navigate` · `browser_observe` · `browser_screenshot` · `browser_click` ·
-`browser_type` · `browser_key` · `browser_scroll` · `browser_mouse` · `browser_drag` · `browser_video` · `browser_eval`
+`browser_type` · `browser_key` · `browser_scroll` · `browser_mouse` · `browser_drag` · `browser_macro` · `browser_video` · `browser_eval`
 
 （原仓库的 `browser_task` 自主要目标规划依赖外部 LLM thinker，未移植。）
+
+### 键鼠宏：一次调用连续操作网页（`browser_macro`）
+把一串键鼠动作**按顺序一次执行完**，省掉「每操作一步都要往返一轮」的开销；默认在结束自动截一张图，一次调用就能「操作 + 看到结果」。中途插 `screenshot` 还能拿到多张过程帧。
+
+`actions` 支持两种写法：
+
+- **JSON 数组字符串**：
+  ```json
+  [{"type":"navigate","url":"http://47.76.80.118/"},
+   {"type":"click","x":640,"y":400},
+   {"type":"key","key":"ArrowRight","action":"down"},
+   {"type":"wait","ms":600},
+   {"type":"key","key":"ArrowRight","action":"up"},
+   {"type":"screenshot"}]
+  ```
+- **行脚本**（每行一个动作，模型更好生成）：
+  ```
+  navigate http://47.76.80.118/
+  click 640,400
+  key ArrowRight down
+  wait 600
+  key ArrowRight up
+  type hello
+  scroll 0,400
+  screenshot
+  ```
+
+可用动作：`navigate URL` · `click 640,400` / `click #btn` · `dblclick` · `rclick`（右键）· `move x,y` · `down` / `up`（按住/松开，可带 button）· `drag x1,y1,x2,y2 [steps]` · `key <键名> [down|up] [次数]`（支持 `Control+C` 等组合键）· `type 文本` · `scroll dx,dy` · `wait 毫秒` · `screenshot`（抓帧）· `observe` · `eval <js>`。
+
+参数：`finalScreenshot`（默认 `true`，结束自动补截图）、`stopOnError`（默认 `false`，遇错继续）、`stepDelay`（每步后额外等待毫秒）。返回**逐步日志** + **多张图片**（过程帧 + 最终帧）。安全上限：最多 50 步、单步 `wait` ≤ 10 秒、总等待 ≤ 60 秒。
 
 ### 看视频 / 听音乐（AI 真正感知媒体）
 - **看视频**：`browser_video` 会**截图当前播放帧**作为图片返回（不只是状态文字）。可一次抓多帧连续跟看：传 `frames`（如 4）和 `interval`（毫秒，如 1500），一次调用抓 N 张帧拼成一组图。视觉模型由此真正「看到」画面。打开 bilibili/YouTube 后调 `browser_video({frames:4, interval:1500})` 即可。
