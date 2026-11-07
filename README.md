@@ -43,16 +43,17 @@ dsh plugin --profile desktop add file:C:/DshBridge/dsh-browser-tools
 - **听音乐**：`server_audio_capture` 把主机音频输出录成 WAV（AI「听」的原始数据），可选经 `AUDIO_ASR_CMD`（如 `whisper %FILE%`）转写成文字。Windows 需在 `AUDIO_DEVICE` 设一个已启用的环回设备（如「Stereo Mix (Realtek)」或虚拟声卡）；Linux 用 pulse。需本机装 `ffmpeg`。
 - 想让**人**直接听到：把浏览器设为有头模式（`BROWSER_HEADLESS=false`），在服务器屏幕上播放、声音从音箱出来，AI 仍用上面的帧截图 / 录音来「看 / 听」。
 
-### 玩网页游戏（AI 操作浏览器）
-浏览器工具本身就是一套完整的「眼睛 + 手」，`browser_key` 还支持**按住/松开**按键，足够驱动大多数网页游戏：
+### 玩网页游戏 / 在网页端工作（AI 操作浏览器）
+浏览器工具是一套完整的「眼睛 + 手」，键盘、鼠标点击、拖拽都能用：
 
-1. `browser_navigate({url:"http://47.76.80.118/"})` 打开游戏页；
-2. `browser_screenshot()` 让 AI 看一眼当前画面（canvas 游戏别用 `browser_observe`，文字/无障碍树对 canvas 无效，截图才有效）；
-3. `browser_click({selector:"canvas"})` 或点坐标 `browser_click({selector:"640,400"})` 给游戏焦点；
-4. 移动/操作：`browser_key({key:"ArrowRight", action:"down"})` 按住方向，`browser_key({key:"ArrowRight", action:"up"})` 松开；`browser_key({key:"Space"})` 普通点击/跳跃；`browser_mouse({action:"down", x, y})` 做点按；拖拽类游戏（弹弓/转向/画线）用 `browser_drag({fromX,fromY,toX,toY,steps})` 一次完成「按住→平滑拖动→松开」。
-5. 循环：截图 → 看 → 按键 → 截图，AI 自己形成「观察-决策-操作」闭环。
+1. `browser_navigate({url:"http://47.76.80.118/"})` 打开网页；
+2. `browser_screenshot()` 看当前画面（canvas 游戏别用 `browser_observe`，文字/无障碍树对 canvas 无效，截图才有效）；
+3. **点击**：`browser_click({target:"css选择器"})` 或 `browser_click({target:"640,400"})` 像素坐标（坐标会直接点，不再等选择器超时）；给 canvas 点一下拿键盘焦点；
+4. **键盘**：`browser_key({key:"ArrowRight", action:"down"})` 按住 → `browser_key({key:"ArrowRight", action:"up"})` 松开；`browser_key({key:"Space"})` 点按/跳跃；`browser_key({key:"a", repeat:5})` 连按 5 次；组合键 `browser_key({key:"Control+C"})`、`browser_key({key:"Shift+ArrowRight", action:"down"})`；
+5. **鼠标**：`browser_mouse({action:"down", x:200, y:400})` 会**先移动到 (200,400) 再按住**，接着 `browser_mouse({action:"move", x:600, y:400})` 拖动，最后 `browser_mouse({action:"up"})` 在原位松开；右键 `browser_mouse({action:"click", x, y, button:"right"})`；双击 `clickCount:2`；拖拽类游戏可直接 `browser_drag({fromX,fromY,toX,toY,steps})`；
+6. 循环：截图 → 看 → 操作 → 截图，AI 自己形成「观察-决策-操作」闭环。
 
-提示：把 `BROWSER_HEADLESS` 设为 `false`，人也能在服务器屏幕上一起看 AI 玩。
+提示：把 `BROWSER_HEADLESS` 设为 `false`，人也能在服务器屏幕上一起看 AI 操作。
 
 ## 服务器控制（通过 QQ 控制本机）
 
